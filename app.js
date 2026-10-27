@@ -20,6 +20,9 @@ const auth = firebase.auth();
 const UMBRAL_VALOR = 0.02;
 const MAX_PARTIDOS = 15;
 
+// API KEY CONFIGURADA
+const MI_API_KEY = "43d1835242f2dcbc0d4191d34292943c";
+
 const INFO_LIGAS = {
   // Grand Slams
   'AO':     { nombre: 'Australian Open', icono: '🇦🇺', superficie: 'Dura' },
@@ -38,7 +41,7 @@ const INFO_LIGAS = {
   'CIN':    { nombre: 'Cincinnati Open', icono: '🇺🇸', superficie: 'Dura' },
   'SHA':    { nombre: 'Rolex Shanghai Masters', icono: '🇨🇳', superficie: 'Dura' },
   'PAR':    { nombre: 'Rolex Paris Masters', icono: '🇫🇷', superficie: 'Dura Indoor' },
-  // ATP 500 (Incluyendo Viena)
+  // ATP 500 (Viena prioritario)
   'VIE':    { nombre: 'Erste Bank Open (Viena)', icono: '🇦🇹', superficie: 'Dura Indoor' },
   'BAR':    { nombre: 'Barcelona Open Banc Sabadell', icono: '🇪🇸', superficie: 'Tierra Batida' },
   'LON':    { nombre: 'Queen\'s Club Championships', icono: '🇬🇧', superficie: 'Hierba' },
@@ -71,7 +74,7 @@ const FOTOS_JUGADORES = {
   'rybakina': './Logos Jugadores/rybakina.png'
 };
 
-let ligaActual = 'VIE'; // Torneo por defecto configurado a Viena
+let ligaActual = 'VIE'; // Predeterminado en Viena
 let soloValor = false;
 let ordenActual = 'fecha';
 let modoHistorial = false;
@@ -104,12 +107,58 @@ function buscarEscudo(nombre) {
   return ICONO_TENIS_DEFAULT;
 }
 
-// ===================== CAPA DE DATOS =====================
+// ===================== CAPA DE DATOS (CON API EN VIVO) =====================
 
-const MI_API_KEY = "43d1835242f2dcbc0d4191d34292943c";
+function mapearClaveTorneo(sportKey) {
+  const k = sportKey.toLowerCase();
+  if (k.includes('vienna') || k.includes('erste_bank')) return 'VIE';
+  if (k.includes('aus_open')) return 'AO';
+  if (k.includes('french_open') || k.includes('roland_garros')) return 'RG';
+  if (k.includes('wimbledon')) return 'WIM';
+  if (k.includes('us_open')) return 'USO';
+  if (k.includes('finals')) return 'FIN';
+  if (k.includes('wta')) return 'WTA';
+  return 'ATP250';
+}
+
 async function cargarArchivoEstatico() {
   if (dbEstatica) return dbEstatica;
 
+  // 1. Intento de carga mediante The Odds API
+  if (MI_API_KEY) {
+    try {
+      const resSports = await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${MI_API_KEY}`);
+      if (resSports.ok) {
+        const todosDeportes = await resSports.json();
+        const torneosTenisActivos = todosDeportes.filter(s => s.key.startsWith('tennis_') && s.active);
+
+        const baseDatosVivo = { restantes: null, ligas: {} };
+
+        for (const torneo of torneosTenisActivos) {
+          const urlOdds = `https://api.the-odds-api.com/v4/sports/${torneo.key}/odds/?apiKey=${MI_API_KEY}&regions=eu&markets=h2h,totals&oddsFormat=decimal`;
+          const resOdds = await fetch(urlOdds);
+          if (resOdds.ok) {
+            const partidos = await resOdds.json();
+            const restantesHeader = resOdds.headers.get('x-requests-remaining');
+            if (restantesHeader) baseDatosVivo.restantes = restantesHeader;
+
+            const codigoTuWeb = mapearClaveTorneo(torneo.key);
+            if (!baseDatosVivo.ligas[codigoTuWeb]) baseDatosVivo.ligas[codigoTuWeb] = [];
+            baseDatosVivo.ligas[codigoTuWeb].push(...partidos);
+          }
+        }
+
+        if (Object.keys(baseDatosVivo.ligas).length > 0) {
+          dbEstatica = baseDatosVivo;
+          return dbEstatica;
+        }
+      }
+    } catch (err) {
+      console.warn("Aviso: Conexión con API en vivo no disponible, recurriendo a archivo local.", err);
+    }
+  }
+
+  // 2. Respaldo local (datos-tenis.json)
   const archivos = ['datos-tenis.json', 'datos-ligas.json', 'partidos.json'];
   for (const archivo of archivos) {
     try {
