@@ -21,7 +21,7 @@ const UMBRAL_VALOR = 0.02;
 const MAX_PARTIDOS = 15;
 
 // API KEY CONFIGURADA
-const MI_API_KEY = "43d1835242f2dcbc0d4191d34292943c";
+const MI_API_KEY = "43d1835242f2";
 
 const INFO_LIGAS = {
   // Grand Slams
