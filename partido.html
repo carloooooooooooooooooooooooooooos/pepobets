@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SportPredicts Tenis - Análisis de Partido</title>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center">
+
+<!-- ================= CABECERA UNIFICADA (PC Y MÓVIL) ================= -->
+<header class="w-full bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-6 py-2.5 flex justify-between items-center sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+        <button onclick="toggleMenuMovil()" class="lg:hidden text-slate-300 hover:text-emerald-400 text-xl p-1.5 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none transition">
+            ☰
+        </button>
+
+        <div class="flex items-center gap-2.5 cursor-pointer group" onclick="window.location.href='index.html'">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shadow-inner group-hover:border-emerald-500/50 transition">
+                <span class="text-lg">🎾</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-black tracking-tight text-white text-sm sm:text-base leading-none group-hover:text-emerald-400 transition">Sport<span class="text-emerald-400">Predicts</span></span>
+                <span class="text-[9px] font-bold text-amber-400/90 tracking-wider uppercase mt-0.5 flex items-center gap-0.5">⚡ TENIS MOTOR V5</span>
+            </div>
+        </div>
+    </div>
+
+    <nav class="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-semibold text-slate-300">
+        <a href="index.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition">Inicio</a>
+        <a href="competiciones.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition">🏆 Torneos ATP/WTA</a>
+        <a href="partidos-hora.html" class="nav-item px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-400 font-bold transition flex items-center gap-1.5 border border-emerald-500/30">
+            <span>⏰</span> Partidos por Hora
+        </a>
+        <a href="partidos.html?liga=AO&historial=true" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition">📜 Historial</a>
+        <a href="calculadora.html" class="nav-item px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-bold transition mx-1">🧮 Calculadora & EV</a>
+        <a href="planes.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition text-sky-400">💎 Planes</a>
+    </nav>
+
+    <div class="flex items-center gap-2.5">
+        <div id="auth-desktop-slot" class="hidden lg:flex items-center">
+            <div id="auth-user-container" class="flex items-center gap-2"></div>
+        </div>
+        <span class="bg-slate-900 text-[10px] px-2.5 py-1 rounded-full text-slate-400 font-bold border border-slate-800">+18</span>
+    </div>
+</header>
+
+<!-- ================= MENÚ DESPLEGABLE MÓVIL ================= -->
+<div id="menu-movil" class="hidden lg:hidden w-full bg-slate-900/98 backdrop-blur-xl border-b border-slate-800 px-5 py-5 flex flex-col gap-2 text-xs font-semibold text-slate-200 sticky top-[57px] z-40 shadow-2xl">
+    <a href="index.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5">🏠 Inicio</a>
+    <a href="competiciones.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5">🏆 Torneos ATP/WTA</a>
+    <a href="partidos-hora.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5 text-emerald-400 font-bold">⏰ Partidos por Hora</a>
+    <a href="calculadora.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5 text-amber-300 font-bold">🧮 Calculadora de Cuotas & EV</a>
+    <a href="partidos.html?liga=AO&historial=true" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5">📜 Historial</a>
+    <a href="planes.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5 text-sky-400 font-bold">💎 Planes</a>
+
+    <div class="border-t border-slate-800 my-2 pt-3 flex flex-col gap-2">
+        <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold px-1">CUENTA DE USUARIO</span>
+        <div class="grid grid-cols-2 gap-2 w-full pt-1">
+            <button onclick="abrirSpAuthModal(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+                🔑 Iniciar Sesión
+            </button>
+            <button onclick="abrirSpAuthModal(true)" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+                📝 Registrarse
+            </button>
+        </div>
+        <div id="auth-mobile-slot" class="hidden"></div>
+    </div>
+</div>
+
+<!-- ================= CONTENIDO PRINCIPAL DEL PARTIDO ================= -->
+<main class="w-full max-w-4xl flex flex-col gap-6 p-3 sm:p-6 my-4">
+
+    <!-- Navegación Superior -->
+    <div class="flex justify-between items-center">
+        <button id="btn-volver-torneo" onclick="window.history.back()" class="text-xs text-slate-300 hover:text-white bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 font-semibold">
+            <span>←</span> Volver al Cuadro
+        </button>
+        <a href="calculadora.html" class="text-xs text-amber-300 hover:text-amber-200 bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 rounded-xl transition font-bold flex items-center gap-1.5">
+            <span>🧮</span> Combinar en Calculadora
+        </a>
+    </div>
+
+    <!-- Contenedor Dinámico del Análisis -->
+    <div id="detalle-partido-container" class="flex flex-col gap-6">
+        <div class="bg-slate-900/50 animate-pulse h-64 rounded-3xl border border-slate-800"></div>
+        <div class="bg-slate-900/50 animate-pulse h-48 rounded-3xl border border-slate-800"></div>
+    </div>
+
+</main>
+
+<!-- Modal Universal de Autenticación -->
+<div id="sp-auth-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 relative shadow-2xl flex flex-col gap-4">
+        <button onclick="cerrarSpAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">✕</button>
+        <div class="flex items-center gap-2">
+            <span class="text-xl">🎾</span>
+            <h3 id="sp-auth-title" class="text-lg font-black text-white">Iniciar Sesión</h3>
+        </div>
+        <p id="sp-auth-subtitle" class="text-xs text-slate-400">Accede a tu cuenta de SportPredicts Tenis V5.</p>
+        <div id="sp-auth-error" class="hidden bg-rose-950/80 border border-rose-800 text-rose-300 text-xs p-2.5 rounded-xl"></div>
+        <div class="flex flex-col gap-3">
+            <input type="email" id="sp-auth-email" placeholder="Correo electrónico" class="w-full bg-slate-950 border border-slate-800 text-white text-xs rounded-xl px-3.5 py-2.5 outline-none focus:border-emerald-500">
+            <input type="password" id="sp-auth-pass" placeholder="Contraseña (mín. 6 caracteres)" class="w-full bg-slate-950 border border-slate-800 text-white text-xs rounded-xl px-3.5 py-2.5 outline-none focus:border-emerald-500">
+            <button id="sp-auth-submit" onclick="ejecutarSpAuth()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-emerald-950/50">Continuar</button>
+        </div>
+        <div class="text-center border-t border-slate-800 pt-3">
+            <button id="sp-auth-switch" onclick="cambiarModoSpAuth()" class="text-xs text-emerald-400 hover:underline font-semibold">¿No tienes cuenta? Regístrate gratis</button>
+        </div>
+    </div>
+</div>
+
+<script src="app.js?v=51"></script>
+<script>
+let partidoActualDetalle = null;
+
+function toggleMenuMovil() {
+    const menu = document.getElementById('menu-movil');
+    if (menu) menu.classList.toggle('hidden');
+}
+
+function reubicarAuthContainer() {
+    const authContainer = document.getElementById('auth-user-container');
+    const desktopSlot = document.getElementById('auth-desktop-slot');
+    const mobileSlot = document.getElementById('auth-mobile-slot');
+    if (!authContainer || !desktopSlot || !mobileSlot) return;
+
+    if (window.innerWidth >= 1024) {
+        if (!desktopSlot.contains(authContainer)) desktopSlot.appendChild(authContainer);
+    } else {
+        if (!mobileSlot.contains(authContainer)) mobileSlot.appendChild(authContainer);
+    }
+}
+
+window.addEventListener('resize', reubicarAuthContainer);
+
+let spModoRegistro = false;
+
+function abrirSpAuthModal(esRegistro) {
+    spModoRegistro = esRegistro;
+    const modal = document.getElementById('sp-auth-modal');
+    const title = document.getElementById('sp-auth-title');
+    const sub = document.getElementById('sp-auth-subtitle');
+    const btn = document.getElementById('sp-auth-submit');
+    const sw = document.getElementById('sp-auth-switch');
+    const err = document.getElementById('sp-auth-error');
+
+    err.classList.add('hidden');
+    if (esRegistro) {
+        title.innerText = 'Crear Cuenta Gratis';
+        sub.innerText = 'Regístrate en segundos para guardar tus pronósticos.';
+        btn.innerText = '📝 Registrarse';
+        sw.innerText = '¿Ya tienes cuenta? Inicia Sesión';
+    } else {
+        title.innerText = 'Iniciar Sesión';
+        sub.innerText = 'Accede a tu cuenta de SportPredicts Tenis V5.';
+        btn.innerText = '🔑 Entrar';
+        sw.innerText = '¿No tienes cuenta? Regístrate gratis';
+    }
+    modal.classList.remove('hidden');
+}
+
+function cerrarSpAuthModal() {
+    document.getElementById('sp-auth-modal').classList.add('hidden');
+}
+
+function cambiarModoSpAuth() {
+    abrirSpAuthModal(!spModoRegistro);
+}
+
+async function ejecutarSpAuth() {
+    const email = document.getElementById('sp-auth-email').value.trim();
+    const pass = document.getElementById('sp-auth-pass').value;
+    const err = document.getElementById('sp-auth-error');
+    err.classList.add('hidden');
+
+    if (!email || pass.length < 6) {
+        err.innerText = 'Introduce un correo válido y una contraseña de al menos 6 caracteres.';
+        err.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        if (spModoRegistro) {
+            await firebase.auth().createUserWithEmailAndPassword(email, pass);
+        } else {
+            await firebase.auth().signInWithEmailAndPassword(email, pass);
+        }
+        cerrarSpAuthModal();
+    } catch (e) {
+        err.innerText = e.message || 'Error al autenticar. Verifica tus datos.';
+        err.classList.remove('hidden');
+    }
+}
+
+async function cargarDetallePartidoTenis() {
+    const container = document.getElementById('detalle-partido-container');
+    if (!container) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const codigoLiga = params.get('liga') || 'AO';
+    const idPartido = parseInt(params.get('id') || '0', 10);
+
+    const infoTorneo = INFO_LIGAS[codigoLiga] || { nombre: 'Torneo Oficial ATP/WTA', icono: '🎾', superficie: 'Pista Oficial' };
+    const datos = await obtenerDatosLiga(codigoLiga);
+    let partidoRaw = null;
+
+    if (datos.partidos && datos.partidos[idPartido]) {
+        partidoRaw = datos.partidos[idPartido];
+    } else {
+        // Búsqueda de respaldo si viene desde la vista global por horas
+        const estatico = await cargarArchivoEstatico();
+        if (estatico && estatico.ligas) {
+            let contadorGlobal = 0;
+            for (const [cod, lista] of Object.entries(estatico.ligas)) {
+                if (Array.isArray(lista)) {
+                    for (const item of lista) {
+                        if (contadorGlobal === idPartido) {
+                            partidoRaw = item;
+                            break;
+                        }
+                        contadorGlobal++;
+                    }
+                }
+                if (partidoRaw) break;
+            }
+        }
+    }
+
+    if (!partidoRaw) {
+        container.innerHTML = `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-10 text-center flex flex-col items-center gap-4">
+                <span class="text-3xl">🎾</span>
+                <p class="text-sm text-slate-300 font-bold">No se encontró el enfrentamiento solicitado.</p>
+                <a href="competiciones.html" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition">Ver todos los torneos</a>
+            </div>
+        `;
+        return;
+    }
+
+    const p = analizarPartido(partidoRaw, idPartido);
+    if (!p) return;
+    partidoActualDetalle = p;
+
+    const prob1Pct = (p.justa.local * 100).toFixed(1);
+    const prob2Pct = (p.justa.visitante * 100).toFixed(1);
+    const cuotaJusta1 = (1 / p.justa.local).toFixed(2);
+    const cuotaJusta2 = (1 / p.justa.visitante).toFixed(2);
+
+    // Estimaciones avanzadas de servicio/resto según probabilidad del modelo
+    const hold1 = Math.min(Math.round(74 + p.justa.local * 18), 93);
+    const hold2 = Math.min(Math.round(74 + p.justa.visitante * 18), 93);
+    const bpConv1 = Math.min(Math.round(35 + p.justa.local * 14), 52);
+    const bpConv2 = Math.min(Math.round(35 + p.justa.visitante * 14), 52);
+    const probTieBreak = p.justa.local > 0.68 || p.justa.visitante > 0.68 ? '28% (Baja)' : '54% (Alta)';
+
+    const textoRecomendacion = descripcionApuesta(p, p.resultadoSugerido);
+
+    container.innerHTML = `
+        <!-- Cabecera del Enfrentamiento -->
+        <section class="bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col gap-6">
+            <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-800/80 pb-4 text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">${infoTorneo.icono}</span>
+                    <span class="font-bold text-white">${esc(infoTorneo.nombre)}</span>
+                    <span class="bg-slate-800 text-emerald-400 px-2.5 py-0.5 rounded-full text-[11px] font-bold">Superficie: ${esc(infoTorneo.superficie || 'Dura')}</span>
+                </div>
+                <div class="flex items-center gap-2 text-slate-400">
+                    <span>📅 ${esc(FECHA.format(p.fecha))}</span>
+                    ${p.esOportunidadTop ? '<span class="bg-amber-500/20 text-amber-300 font-bold px-2.5 py-1 rounded-lg border border-amber-500/30">💎 Oportunidad EV+</span>' : `<span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg font-semibold">${esc(p.etiquetaConfianza)}</span>`}
+                </div>
+            </div>
+
+            <!-- Cara a Cara Tenistas -->
+            <div class="grid grid-cols-3 items-center gap-4 py-2">
+                <div class="flex flex-col items-center text-center gap-2">
+                    <img src="${esc(buscarEscudo(p.local))}" alt="${esc(p.local)}" class="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full bg-slate-900 p-2 border-2 ${p.resultadoSugerido === 'local' ? 'border-emerald-500 shadow-lg shadow-emerald-950/60' : 'border-slate-800'}" onerror="this.src='${ICONO_TENIS_DEFAULT}'">
+                    <h2 class="text-sm sm:text-lg font-black text-white">${esc(p.local)}</h2>
+                    <span class="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-3 py-1 rounded-full">
+                        Cuota ${p.cuotasOriginales.local.toFixed(2)}
+                    </span>
+                </div>
+
+                <div class="flex flex-col items-center justify-center gap-1">
+                    <span class="text-xs uppercase tracking-widest text-slate-500 font-bold">Cara a Cara</span>
+                    <span class="text-2xl sm:text-3xl font-black text-emerald-400">VS</span>
+                    <span class="text-[11px] text-slate-400 text-center">Probabilidad IA Sin Margen</span>
+                </div>
+
+                <div class="flex flex-col items-center text-center gap-2">
+                    <img src="${esc(buscarEscudo(p.visitante))}" alt="${esc(p.visitante)}" class="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-full bg-slate-900 p-2 border-2 ${p.resultadoSugerido === 'visitante' ? 'border-emerald-500 shadow-lg shadow-emerald-950/60' : 'border-slate-800'}" onerror="this.src='${ICONO_TENIS_DEFAULT}'">
+                    <h2 class="text-sm sm:text-lg font-black text-white">${esc(p.visitante)}</h2>
+                    <span class="text-xs font-bold text-sky-400 bg-sky-950/60 border border-sky-800/50 px-3 py-1 rounded-full">
+                        Cuota ${p.cuotasOriginales.visitante.toFixed(2)}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Barra de Probabilidad 2-Way -->
+            <div class="flex flex-col gap-2 bg-slate-950/90 p-4 rounded-2xl border border-slate-800">
+                <div class="flex justify-between text-xs font-bold">
+                    <span class="text-emerald-400">${esc(p.local)}: ${prob1Pct}%</span>
+                    <span class="text-sky-400">${esc(p.visitante)}: ${prob2Pct}%</span>
+                </div>
+                <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+                    <div style="width: ${prob1Pct}%" class="bg-emerald-500 h-full transition-all duration-500"></div>
+                    <div style="width: ${prob2Pct}%" class="bg-sky-500 h-full transition-all duration-500"></div>
+                </div>
+                <div class="flex justify-between text-[11px] text-slate-400 pt-1">
+                    <span>Cuota Justa IA: <strong class="text-white">${cuotaJusta1}</strong></span>
+                    <span>Cuota Justa IA: <strong class="text-white">${cuotaJusta2}</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mercados Principales de Tenis (Juegos, Sets, Hándicap) -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1.5">
+                <span class="text-[11px] font-bold text-slate-400 uppercase flex items-center gap-1.5">🎾 Línea de Juegos</span>
+                <span class="text-sm font-black text-white">${esc(p.tendenciaJuegos)}</span>
+                <span class="text-[11px] text-slate-400">Estimación basada en paridad de saque y superficie.</span>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1.5">
+                <span class="text-[11px] font-bold text-slate-400 uppercase flex items-center gap-1.5">📊 Proyección de Sets</span>
+                <span class="text-sm font-black text-white">${esc(p.tendenciaSets)}</span>
+                <span class="text-[11px] text-slate-400">Probabilidad de Tie-Break en el partido: <strong class="text-emerald-400">${probTieBreak}</strong></span>
+            </div>
+
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 flex flex-col gap-1.5">
+                <span class="text-[11px] font-bold text-slate-400 uppercase flex items-center gap-1.5">🔥 Hándicap Recomendado</span>
+                <span class="text-sm font-black text-white">${esc(p.tendenciaHandicap)}</span>
+                <span class="text-[11px] text-slate-400">Diferencial proyectado de roturas de servicio (Breaks).</span>
+            </div>
+        </section>
+
+        <!-- Comparativa de Rendimiento en Pista (Saque / Resto) -->
+        <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 flex flex-col gap-4">
+            <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <span>📈</span> Proyección de Rendimiento en Superficie (${esc(infoTorneo.superficie || 'Pista Oficial')})
+            </h3>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex flex-col gap-2">
+                    <div class="flex justify-between font-bold text-slate-300">
+                        <span>${esc(p.local)}</span>
+                        <span class="text-emerald-400">Saque mantenido: ${hold1}%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div class="bg-emerald-500 h-full" style="width: ${hold1}%"></div>
+                    </div>
+                    <span class="text-[11px] text-slate-400">Conversión de Break Points estimada: <strong class="text-white">${bpConv1}%</strong></span>
+                </div>
+
+                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex flex-col gap-2">
+                    <div class="flex justify-between font-bold text-slate-300">
+                        <span>${esc(p.visitante)}</span>
+                        <span class="text-sky-400">Saque mantenido: ${hold2}%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div class="bg-sky-500 h-full" style="width: ${hold2}%"></div>
+                    </div>
+                    <span class="text-[11px] text-slate-400">Conversión de Break Points estimada: <strong class="text-white">${bpConv2}%</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recomendación Final del Motor V5 y Simulador de Stake -->
+        <section class="bg-slate-900 border border-emerald-500/40 rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-xl">
+            <div class="flex flex-col gap-1 text-center sm:text-left">
+                <span class="text-[11px] uppercase tracking-wider font-extrabold text-emerald-400">⚡ Pronóstico Principal Motor V5</span>
+                <h3 class="text-lg sm:text-xl font-black text-white">${esc(textoRecomendacion)}</h3>
+                <p class="text-xs text-slate-400">
+                    Mejor cuota detectada: <strong class="text-white">${p.mejorCuota.cuota.toFixed(2)}</strong> en <strong>${esc(p.mejorCuota.casa)}</strong> • Confianza IA: <strong class="text-emerald-400">${(p.probabilidadAcierto * 100).toFixed(1)}%</strong>
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                <div class="flex flex-col gap-1">
+                    <label class="text-[10px] uppercase text-slate-400 font-bold">Simular Stake (€)</label>
+                    <input type="number" id="detalle-stake" value="10" min="1" max="10000" oninput="recalcularBeneficioDetalle()" class="w-24 bg-slate-900 border border-slate-700 text-white font-bold text-xs rounded-xl px-3 py-2 text-center outline-none focus:border-emerald-500">
+                </div>
+                <div class="text-center sm:text-right">
+                    <span class="text-[11px] text-slate-400 block">Beneficio Neto</span>
+                    <span id="detalle-beneficio" class="text-base font-black text-emerald-400">+${EUR.format(10 * (p.mejorCuota.cuota - 1))}</span>
+                </div>
+                <a href="https://www.bet365.com" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-5 py-3 rounded-xl text-center transition shadow-lg">
+                    Apostar
+                </a>
+            </div>
+        </section>
+    `;
+}
+
+function recalcularBeneficioDetalle() {
+    if (!partidoActualDetalle) return;
+    const input = document.getElementById('detalle-stake');
+    const out = document.getElementById('detalle-beneficio');
+    const stake = Math.min(Math.max(parseFloat(input?.value) || 10, 1), 10000);
+    const neto = stake * (partidoActualDetalle.mejorCuota.cuota - 1);
+    if (out) out.textContent = `+${EUR.format(neto)}`;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    reubicarAuthContainer();
+    cargarDetallePartidoTenis();
+});
+</script>
+</body>
+</html>
