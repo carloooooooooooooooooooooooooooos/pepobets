@@ -1,0 +1,153 @@
+/* ==========================================================================
+   SportPredicts Tenis V5 - Hoja de Estilos Principal (style.css)
+   Compatible con Tailwind CSS y todos los módulos HTML/JS de la plataforma
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg-primary: #020617;     /* slate-950 */
+  --bg-card: #0f172a;        /* slate-900 */
+  --border-subtle: #1e293b;  /* slate-800 */
+  --accent-tennis: #10b981;  /* emerald-500 */
+  --accent-glow: rgba(16, 185, 129, 0.25);
+  --ev-amber: #f59e0b;       /* amber-500 */
+}
+
+/* 1. Reset Base y Tipografía */
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg-primary);
+  color: #f1f5f9;
+}
+
+body {
+  background-color: var(--bg-primary);
+  background-image: 
+    radial-gradient(circle at 15% 0%, rgba(16, 185, 129, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 85% 100%, rgba(245, 158, 11, 0.04) 0%, transparent 45%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* 2. Barras de Desplazamiento Personalizadas (Modales y Filtros de Calculadora) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-tennis);
+}
+
+/* 3. Limpieza de Inputs Numéricos (Stake y Cuota Casa en Calculadora) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* 4. Navegación y Estados Activos */
+.nav-item,
+.nav-item-movil {
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-item:hover {
+  transform: translateY(-1px);
+}
+
+/* 5. Tarjetas de Torneos (competiciones.html) y Partidos (app.js) */
+.liga-btn,
+#partidos-container article,
+#lista-global-horas-page article {
+  transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.22s ease,
+              box-shadow 0.22s ease;
+}
+
+.liga-btn:hover,
+#partidos-container article:hover,
+#lista-global-horas-page article:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.65),
+              0 0 16px -4px rgba(16, 185, 129, 0.18);
+}
+
+.liga-btn:active,
+#partidos-container article:active,
+#lista-global-horas-page article:active {
+  transform: translateY(0);
+}
+
+/* 6. Animación Suave para Modales (#sp-auth-modal, #modal-detalle, #modal-global-horas) */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+#sp-auth-modal:not(.hidden) > div,
+#modal-detalle:not(.hidden) > div,
+#modal-global-horas:not(.hidden) > div {
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* 7. Mejoras Visuales para Selectores Desplegables */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1rem;
+  padding-right: 2.25rem !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+select option,
+select optgroup {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+/* 8. Efecto de Brillo Sutil para Etiquetas EV+ (Valor Esperado) */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 12px 2px rgba(245, 158, 11, 0.35);
+  }
+}
+
+button[aria-pressed="true"]#btn-solo-valor {
+  animation: pulseGlow 2.2s infinite ease-in-out;
+}
