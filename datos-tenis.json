@@ -1,24 +1,117 @@
 {
-  "restantes": 450,
+  "restantes": 490,
   "ligas": {
+    "VIE": [
+      {
+        "local": "Alexander Zverev",
+        "visitante": "Alex Michelsen",
+        "fecha": "2026-10-28T14:00:00Z",
+        "cuota1": 1.25,
+        "cuota2": 4.00,
+        "casa": "Bet365",
+        "tendenciaJuegos": "Menos de 21.5 Juegos (Dominio al saque)",
+        "tendenciaSets": "2 Sets (Victoria en sets corridos)",
+        "tendenciaHandicap": "Hándicap -4.5 Juegos (Alexander Zverev)"
+      },
+      {
+        "local": "Daniil Medvedev",
+        "visitante": "Frances Tiafoe",
+        "fecha": "2026-10-28T17:30:00Z",
+        "cuota1": 1.42,
+        "cuota2": 2.90,
+        "casa": "Bet365",
+        "tendenciaJuegos": "Más de 22.5 Juegos (65% prob.)",
+        "tendenciaSets": "3 Sets / Ambos ganan un set",
+        "tendenciaHandicap": "Hándicap +3.5 Juegos (Frances Tiafoe)"
+      },
+      {
+        "local": "Carlos Alcaraz",
+        "visitante": "Jack Draper",
+        "fecha": "2026-10-29T16:00:00Z",
+        "cuota1": 1.35,
+        "cuota2": 3.20,
+        "casa": "Bet365",
+        "tendenciaJuegos": "Más de 21.5 Juegos (62% prob.)",
+        "tendenciaSets": "2 Sets (Victoria en sets corridos)",
+        "tendenciaHandicap": "Hándicap -3.5 Juegos (Carlos Alcaraz)"
+      }
+    ],
     "AO": [
       {
         "local": "Carlos Alcaraz",
         "visitante": "Daniil Medvedev",
-        "fecha": "2026-10-28T19:30:00Z",
+        "fecha": "2026-11-15T09:30:00Z",
         "cuota1": 1.48,
         "cuota2": 2.75,
-        "casa": "Bet365"
+        "casa": "Bet365",
+        "tendenciaJuegos": "Más de 22.5 Juegos (64% prob.)",
+        "tendenciaSets": "3 Sets / Ambos ganan un set",
+        "tendenciaHandicap": "Hándicap -3.5 Juegos (Carlos Alcaraz)"
       }
     ],
-    "MAD": [
+    "RG": [
+      {
+        "local": "Carlos Alcaraz",
+        "visitante": "Casper Ruud",
+        "fecha": "2026-11-16T14:00:00Z",
+        "cuota1": 1.33,
+        "cuota2": 3.40,
+        "casa": "Bet365",
+        "tendenciaJuegos": "Menos de 21.5 Juegos (Dominio claro)",
+        "tendenciaSets": "2 Sets (Victoria en sets corridos)",
+        "tendenciaHandicap": "Hándicap -4.5 Juegos (Carlos Alcaraz)"
+      }
+    ],
+    "WIM": [
+      {
+        "local": "Novak Djokovic",
+        "visitante": "Alex de Minaur",
+        "fecha": "2026-11-17T15:00:00Z",
+        "cuota1": 1.44,
+        "cuota2": 2.85,
+        "casa": "Bet365",
+        "tendenciaJuegos": "Más de 21.5 Juegos (61% prob.)",
+        "tendenciaSets": "2 Sets (Victoria en sets corridos)",
+        "tendenciaHandicap": "Hándicap -3.5 Juegos (Novak Djokovic)"
+      }
+    ],
+    "USO": [
       {
         "local": "Jannik Sinner",
-        "visitante": "Alexander Zverev",
-        "fecha": "2026-10-29T16:00:00Z",
-        "cuota1": 1.62,
-        "cuota2": 2.30,
-        "casa": "Bet365"
+        "visitante": "Grigor Dimitrov",
+        "fecha": "2026-11-18T19:00:00Z",
+        "cuota1": 1.30,
+        "cuota2": 3.60,
+        "casa": "Bet365",
+        "tendenciaJuegos": "Menos de 21.5 Juegos (Dominio claro)",
+        "tendenciaSets": "2 Sets (Victoria en sets corridos)",
+        "tendenciaHandicap": "Hándicap -4.5 Juegos (Jannik Sinner)"
+      }
+    ],
+    "FIN": [
+      {
+        "local": "Jannik Sinner",
+        "visitante": "Carlos Alcaraz",
+        "fecha": "2026-11-19T20:00:00Z",
+        "cuota1": 1.85,
+        "cuota2": 1.98,
+        "casa": "Bet365",
+        "tendenciaJuegos": "Más de 22.5 Juegos (76% prob.)",
+        "tendenciaSets": "3 Sets / Ambos ganan un set",
+        "tendenciaHandicap": "Hándicap +2.5 Juegos / Posible Tie-Break"
+      }
+    ],
+    "WTA": [
+      {
+        "local": "Aryna Sabalenka",
+        "visitante": "Iga Swiatek",
+        "fecha": "2026-11-15T17:30:00Z",
+        "cuota1": 1.80,
+        "cuota2": 2.05,
+        "casa": "Bet365",
+        "tendenciaJuegos": "Más de 21.5 Juegos (72% prob.)",
+        "tendenciaSets": "3 Sets / Ambas ganan un set",
+        "tendenciaHandicap": "Hándicap +2.5 Juegos (Iga Swiatek)"
       }
     ]
   }
