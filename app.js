@@ -106,6 +106,7 @@ function buscarEscudo(nombre) {
 
 // ===================== CAPA DE DATOS =====================
 
+const MI_API_KEY = "43d1835242f2dcbc0d4191d34292943c";
 async function cargarArchivoEstatico() {
   if (dbEstatica) return dbEstatica;
 
