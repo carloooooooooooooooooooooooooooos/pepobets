@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SportPredicts Tenis - Todos los Torneos de la Temporada</title>
+<title>SportPredicts Tenis - Todos los Torneos</title>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -11,13 +11,9 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center">
 
-<!-- ================= CABECERA UNIFICADA (PC Y MÓVIL) ================= -->
 <header class="w-full bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-6 py-2.5 flex justify-between items-center sticky top-0 z-50">
     <div class="flex items-center gap-3">
-        <button onclick="toggleMenuMovil()" class="lg:hidden text-slate-300 hover:text-emerald-400 text-xl p-1.5 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none transition">
-            ☰
-        </button>
-
+        <button onclick="toggleMenuMovil()" class="lg:hidden text-slate-300 hover:text-emerald-400 text-xl p-1.5 rounded-lg bg-slate-900 border border-slate-800 focus:outline-none transition">☰</button>
         <div class="flex items-center gap-2.5 cursor-pointer group" onclick="window.location.href='index.html'">
             <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shadow-inner group-hover:border-emerald-500/50 transition">
                 <span class="text-lg">🎾</span>
@@ -30,126 +26,100 @@
     </div>
 
     <nav class="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-semibold text-slate-300">
-        <a href="index.html" data-nav="index.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition flex items-center gap-1.5">
-            Inicio
-        </a>
-        <a href="competiciones.html" data-nav="competiciones.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition flex items-center gap-1.5">
-            <span>🏆</span> Torneos ATP/WTA
-        </a>
-        <a href="partidos-hora.html" class="nav-item px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-400 font-bold transition flex items-center gap-1.5 border border-emerald-500/30">
-            <span>⏰</span> Partidos por Hora
-        </a>
-        <a href="partidos.html?liga=AO&historial=true" data-nav="partidos.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition flex items-center gap-1.5">
-            <span>📜</span> Historial
-        </a>
-        <a href="calculadora.html" data-nav="calculadora.html" class="nav-item px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-bold transition flex items-center gap-1.5 mx-1">
-            <span>🧮</span> Calculadora & EV
-        </a>
-        <a href="planes.html" data-nav="planes.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition flex items-center gap-1.5">
-            <span class="text-sky-400">💎</span> Planes
-        </a>
+        <a href="index.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition">Inicio</a>
+        <a href="competiciones.html" class="nav-item px-3 py-2 rounded-xl bg-slate-900 text-emerald-400 transition">🏆 Torneos ATP/WTA</a>
+        <a href="partidos-hora.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-800 text-emerald-400 font-bold transition border border-emerald-500/30">⏰ Partidos por Hora</a>
+        <a href="partidos.html?liga=VIE&historial=true" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition">📜 Historial</a>
+        <a href="calculadora.html" class="nav-item px-3.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-bold transition mx-1">🧮 Calculadora & EV</a>
+        <a href="planes.html" class="nav-item px-3 py-2 rounded-xl hover:bg-slate-900 hover:text-emerald-400 transition text-sky-400">💎 Planes</a>
     </nav>
 
     <div class="flex items-center gap-2.5">
-        <div id="auth-desktop-slot" class="hidden lg:flex items-center">
-            <div id="auth-user-container" class="flex items-center gap-2"></div>
-        </div>
+        <div id="auth-desktop-slot" class="hidden lg:flex items-center"><div id="auth-user-container" class="flex items-center gap-2"></div></div>
         <span class="bg-slate-900 text-[10px] px-2.5 py-1 rounded-full text-slate-400 font-bold border border-slate-800">+18</span>
     </div>
 </header>
 
-<!-- ================= MENÚ DESPLEGABLE MÓVIL ================= -->
 <div id="menu-movil" class="hidden lg:hidden w-full bg-slate-900/98 backdrop-blur-xl border-b border-slate-800 px-5 py-5 flex flex-col gap-2 text-xs font-semibold text-slate-200 sticky top-[57px] z-40 shadow-2xl">
-    <a href="index.html" data-nav="index.html" class="nav-item-movil py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5">
-        <span class="text-base">🏠</span> Inicio
-    </a>
-    <a href="competiciones.html" data-nav="competiciones.html" class="nav-item-movil py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5">
-        <span class="text-base">🏆</span> Torneos ATP/WTA
-    </a>
-    <a href="partidos-hora.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5 text-emerald-400 font-bold">
-        <span class="text-base">⏰</span> Partidos por Hora
-    </a>
-    <a href="calculadora.html" data-nav="calculadora.html" class="nav-item-movil py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5 text-amber-300 font-bold">
-        <span class="text-base">🧮</span> Calculadora de Cuotas & EV
-    </a>
-    <a href="partidos.html?liga=AO&historial=true" data-nav="partidos.html" class="nav-item-movil py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5">
-        <span class="text-base">📜</span> Historial
-    </a>
-    <a href="planes.html" data-nav="planes.html" class="nav-item-movil py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition flex items-center gap-2.5 text-emerald-400 font-bold">
-        <span class="text-base">💎</span> Planes
-    </a>
-
-    <div class="border-t border-slate-800 my-2 pt-3 flex flex-col gap-2">
-        <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold px-1">CUENTA DE USUARIO</span>
-        <div class="grid grid-cols-2 gap-2 w-full pt-1">
-            <button onclick="abrirSpAuthModal(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
-                🔑 Iniciar Sesión
-            </button>
-            <button onclick="abrirSpAuthModal(true)" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
-                📝 Registrarse
-            </button>
-        </div>
-        <div id="auth-mobile-slot" class="hidden"></div>
-    </div>
+    <a href="index.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition">🏠 Inicio</a>
+    <a href="competiciones.html" class="py-2.5 px-3 rounded-xl bg-slate-800 text-emerald-400 font-bold transition">🏆 Torneos ATP/WTA</a>
+    <a href="partidos-hora.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition text-emerald-400 font-bold">⏰ Partidos por Hora</a>
+    <a href="calculadora.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition text-amber-300 font-bold">🧮 Calculadora de Cuotas & EV</a>
+    <a href="partidos.html?liga=VIE&historial=true" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition">📜 Historial</a>
+    <a href="planes.html" class="py-2.5 px-3 rounded-xl hover:bg-slate-800/70 transition text-sky-400 font-bold">💎 Planes</a>
 </div>
 
-<!-- Contenido Principal de Torneos -->
 <main class="w-full max-w-6xl flex flex-col gap-6 p-3 sm:p-6 my-4">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-800 pb-4">
         <div>
             <h1 class="text-lg sm:text-xl font-black text-white">🏆 Torneos de la Temporada (ATP / WTA / Grand Slams)</h1>
-            <p class="text-[11px] sm:text-xs text-slate-400">Selecciona un torneo para consultar sus partidos, superficies y oportunidades EV+.</p>
+            <p class="text-[11px] sm:text-xs text-slate-400">Selecciona un torneo para consultar sus partidos y oportunidades EV+.</p>
         </div>
         <a href="index.html" class="text-[11px] sm:text-xs text-slate-400 hover:text-white transition bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl">← Volver al Inicio</a>
     </div>
 
-    <!-- Cuadrícula responsive de los 23 Torneos de Tenis -->
-    <div id="ligas-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-        <!-- 1. Australian Open -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        <!-- Viena (Destacado actual) -->
+        <div onclick="window.location.href='partidos.html?liga=VIE'" class="liga-btn bg-slate-900/90 border-2 border-emerald-500/70 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group shadow-lg">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 text-lg shrink-0">🇦🇹</div>
+                <div>
+                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Erste Bank Open (Viena)</h3>
+                    <p class="text-[10px] sm:text-[11px] text-amber-400 font-bold mt-0.5">🔥 ATP 500 • ¡En Juego Ahora!</p>
+                </div>
+            </div>
+            <span class="text-[11px] text-emerald-400 font-semibold transition pt-2 border-t border-slate-800/80">Ver partidos Viena →</span>
+        </div>
+
+        <!-- Australian Open -->
         <div onclick="window.location.href='partidos.html?liga=AO'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
             <div class="flex items-start gap-3">
                 <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇦🇺</div>
                 <div>
                     <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Australian Open</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Grand Slam • Pista Dura (Enero)</p>
+                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Grand Slam • Pista Dura</p>
                 </div>
             </div>
             <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
         </div>
-        <!-- 2. Roland Garros -->
+
+        <!-- Roland Garros -->
         <div onclick="window.location.href='partidos.html?liga=RG'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
             <div class="flex items-start gap-3">
                 <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇫🇷</div>
                 <div>
                     <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Roland Garros</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Grand Slam • Tierra Batida (Mayo)</p>
+                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Grand Slam • Tierra Batida</p>
                 </div>
             </div>
             <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
         </div>
-        <!-- 3. Wimbledon -->
+
+        <!-- Wimbledon -->
         <div onclick="window.location.href='partidos.html?liga=WIM'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
             <div class="flex items-start gap-3">
                 <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇬🇧</div>
                 <div>
                     <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Wimbledon</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Grand Slam • Hierba (Julio)</p>
+                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Grand Slam • Hierba</p>
                 </div>
             </div>
             <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
         </div>
-        <!-- 4. US Open -->
+
+        <!-- US Open -->
         <div onclick="window.location.href='partidos.html?liga=USO'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
             <div class="flex items-start gap-3">
                 <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇺🇸</div>
                 <div>
                     <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">US Open</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Grand Slam • Pista Dura (Agosto)</p>
+                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Grand Slam • Pista Dura</p>
                 </div>
             </div>
             <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
         </div>
-        <!-- 5. ATP / WTA Finals -->
+
+        <!-- ATP Finals -->
         <div onclick="window.location.href='partidos.html?liga=FIN'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
             <div class="flex items-start gap-3">
                 <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">👑</div>
@@ -160,183 +130,8 @@
             </div>
             <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
         </div>
-        <!-- 6. Indian Wells -->
-        <div onclick="window.location.href='partidos.html?liga=IW'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇺🇸</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Indian Wells</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 / WTA 1000 • Dura</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 7. Miami Open -->
-        <div onclick="window.location.href='partidos.html?liga=MIA'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇺🇸</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Miami Open</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 / WTA 1000 • Dura</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 8. Monte-Carlo Masters -->
-        <div onclick="window.location.href='partidos.html?liga=MC'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇲🇨</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Monte-Carlo Masters</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 • Tierra Batida</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 9. Mutua Madrid Open -->
-        <div onclick="window.location.href='partidos.html?liga=MAD'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇪🇸</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Mutua Madrid Open</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 / WTA 1000 • Tierra</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 10. Roma Open -->
-        <div onclick="window.location.href='partidos.html?liga=ROM'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇮🇹</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Roma (Foro Italico)</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 / WTA 1000 • Tierra</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 11. Canadian Open -->
-        <div onclick="window.location.href='partidos.html?liga=CAN'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇨🇦</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Canadian Open</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 • Montreal / Toronto</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 12. Cincinnati Open -->
-        <div onclick="window.location.href='partidos.html?liga=CIN'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇺🇸</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Cincinnati Open</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 / WTA 1000 • Dura</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 13. Shanghai Masters -->
-        <div onclick="window.location.href='partidos.html?liga=SHA'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇨🇳</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Shanghai Masters</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 • Pista Dura</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 14. Paris Masters -->
-        <div onclick="window.location.href='partidos.html?liga=PAR'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇫🇷</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Rolex Paris Masters</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Masters 1000 • Dura Indoor</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 15. Barcelona Open -->
-        <div onclick="window.location.href='partidos.html?liga=BAR'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇪🇸</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Conde de Godó (BCN)</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">ATP 500 • Tierra Batida</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 16. Queen's Club -->
-        <div onclick="window.location.href='partidos.html?liga=LON'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇬🇧</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Queen's Club Londres</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">ATP 500 • Hierba</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 17. Halle Open -->
-        <div onclick="window.location.href='partidos.html?liga=HAL'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇩🇪</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Terra Wortmann Halle</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">ATP 500 • Hierba</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 18. Dubai Tennis Championships -->
-        <div onclick="window.location.href='partidos.html?liga=DUB'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇦🇪</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Dubai Championships</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">ATP 500 / WTA 1000 • Dura</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 19. Acapulco Open -->
-        <div onclick="window.location.href='partidos.html?liga=ACA'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇲🇽</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Abierto de Acapulco</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">ATP 500 • Pista Dura</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 20. Tokio Open -->
-        <div onclick="window.location.href='partidos.html?liga=TOK'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🇯🇵</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Japan Open (Tokio)</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">ATP 500 • Pista Dura</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 21. Circuito ATP 250 -->
-        <div onclick="window.location.href='partidos.html?liga=ATP250'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🎾</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Circuito ATP 250</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Torneos Semanales ATP</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
-        <!-- 22. WTA Tour -->
+
+        <!-- WTA Tour -->
         <div onclick="window.location.href='partidos.html?liga=WTA'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
             <div class="flex items-start gap-3">
                 <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">✨</div>
@@ -347,131 +142,12 @@
             </div>
             <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
         </div>
-        <!-- 23. Copa Davis / Laver Cup -->
-        <div onclick="window.location.href='partidos.html?liga=DAV'" class="liga-btn bg-slate-900/90 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl cursor-pointer transition flex flex-col justify-between gap-3 group">
-            <div class="flex items-start gap-3">
-                <div class="w-8 h-8 flex items-center justify-center bg-slate-950 rounded-xl border border-slate-800 shrink-0">🌍</div>
-                <div>
-                    <h3 class="font-bold text-white text-xs sm:text-sm group-hover:text-emerald-400 transition">Copa Davis / United Cup</h3>
-                    <p class="text-[10px] sm:text-[11px] text-slate-400 mt-0.5">Competiciones por Equipos</p>
-                </div>
-            </div>
-            <span class="text-[11px] text-slate-400 group-hover:text-white font-semibold transition pt-2 border-t border-slate-800/80">Ver cuadro →</span>
-        </div>
     </div>
 </main>
 
-<!-- Modal Universal de Autenticación -->
-<div id="sp-auth-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-sm p-6 relative shadow-2xl flex flex-col gap-4">
-        <button onclick="cerrarSpAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg font-bold">✕</button>
-        <div class="flex items-center gap-2">
-            <span class="text-xl">🎾</span>
-            <h3 id="sp-auth-title" class="text-lg font-black text-white">Iniciar Sesión</h3>
-        </div>
-        <p id="sp-auth-subtitle" class="text-xs text-slate-400">Accede a tu cuenta de SportPredicts Tenis V5.</p>
-        <div id="sp-auth-error" class="hidden bg-rose-950/80 border border-rose-800 text-rose-300 text-xs p-2.5 rounded-xl"></div>
-        <div class="flex flex-col gap-3">
-            <input type="email" id="sp-auth-email" placeholder="Correo electrónico" class="w-full bg-slate-950 border border-slate-800 text-white text-xs rounded-xl px-3.5 py-2.5 outline-none focus:border-emerald-500">
-            <input type="password" id="sp-auth-pass" placeholder="Contraseña (mín. 6 caracteres)" class="w-full bg-slate-950 border border-slate-800 text-white text-xs rounded-xl px-3.5 py-2.5 outline-none focus:border-emerald-500">
-            <button id="sp-auth-submit" onclick="ejecutarSpAuth()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg shadow-emerald-950/50">Continuar</button>
-        </div>
-        <div class="text-center border-t border-slate-800 pt-3">
-            <button id="sp-auth-switch" onclick="cambiarModoSpAuth()" class="text-xs text-emerald-400 hover:underline font-semibold">¿No tienes cuenta? Regístrate gratis</button>
-        </div>
-    </div>
-</div>
-
-<script src="app.js?v=51"></script>
+<script src="app.js?v=52"></script>
 <script>
-function toggleMenuMovil() {
-    const menu = document.getElementById('menu-movil');
-    if (menu) menu.classList.toggle('hidden');
-}
-
-function reubicarAuthContainer() {
-    const authContainer = document.getElementById('auth-user-container');
-    const desktopSlot = document.getElementById('auth-desktop-slot');
-    const mobileSlot = document.getElementById('auth-mobile-slot');
-    if (!authContainer || !desktopSlot || !mobileSlot) return;
-
-    if (window.innerWidth >= 1024) {
-        if (!desktopSlot.contains(authContainer)) desktopSlot.appendChild(authContainer);
-    } else {
-        if (!mobileSlot.contains(authContainer)) mobileSlot.appendChild(authContainer);
-    }
-}
-
-window.addEventListener('resize', reubicarAuthContainer);
-
-let spModoRegistro = false;
-
-function abrirSpAuthModal(esRegistro) {
-    spModoRegistro = esRegistro;
-    const modal = document.getElementById('sp-auth-modal');
-    const title = document.getElementById('sp-auth-title');
-    const sub = document.getElementById('sp-auth-subtitle');
-    const btn = document.getElementById('sp-auth-submit');
-    const sw = document.getElementById('sp-auth-switch');
-    const err = document.getElementById('sp-auth-error');
-
-    err.classList.add('hidden');
-    if (esRegistro) {
-        title.innerText = 'Crear Cuenta Gratis';
-        sub.innerText = 'Regístrate en segundos para guardar tus pronósticos.';
-        btn.innerText = '📝 Registrarse';
-        sw.innerText = '¿Ya tienes cuenta? Inicia Sesión';
-    } else {
-        title.innerText = 'Iniciar Sesión';
-        sub.innerText = 'Accede a tu cuenta de SportPredicts Tenis V5.';
-        btn.innerText = '🔑 Entrar';
-        sw.innerText = '¿No tienes cuenta? Regístrate gratis';
-    }
-    modal.classList.remove('hidden');
-}
-
-function cerrarSpAuthModal() {
-    document.getElementById('sp-auth-modal').classList.add('hidden');
-}
-
-function cambiarModoSpAuth() {
-    abrirSpAuthModal(!spModoRegistro);
-}
-
-async function ejecutarSpAuth() {
-    const email = document.getElementById('sp-auth-email').value.trim();
-    const pass = document.getElementById('sp-auth-pass').value;
-    const err = document.getElementById('sp-auth-error');
-    err.classList.add('hidden');
-
-    if (!email || pass.length < 6) {
-        err.innerText = 'Introduce un correo válido y una contraseña de al menos 6 caracteres.';
-        err.classList.remove('hidden');
-        return;
-    }
-
-    try {
-        if (spModoRegistro) {
-            await firebase.auth().createUserWithEmailAndPassword(email, pass);
-        } else {
-            await firebase.auth().signInWithEmailAndPassword(email, pass);
-        }
-        cerrarSpAuthModal();
-    } catch (e) {
-        err.innerText = e.message || 'Error al autenticar. Verifica tus datos.';
-        err.classList.remove('hidden');
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    reubicarAuthContainer();
-    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    document.querySelectorAll('[data-nav]').forEach(link => {
-        if (link.getAttribute('data-nav') === currentPage) {
-            link.classList.add('text-emerald-400', 'bg-slate-900/90');
-        }
-    });
-});
+function toggleMenuMovil() { const m = document.getElementById('menu-movil'); if (m) m.classList.toggle('hidden'); }
 </script>
 </body>
 </html>
