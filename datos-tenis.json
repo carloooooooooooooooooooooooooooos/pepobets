@@ -1,0 +1,25 @@
+{
+  "restantes": 450,
+  "ligas": {
+    "AO": [
+      {
+        "local": "Carlos Alcaraz",
+        "visitante": "Daniil Medvedev",
+        "fecha": "2026-10-28T19:30:00Z",
+        "cuota1": 1.48,
+        "cuota2": 2.75,
+        "casa": "Bet365"
+      }
+    ],
+    "MAD": [
+      {
+        "local": "Jannik Sinner",
+        "visitante": "Alexander Zverev",
+        "fecha": "2026-10-29T16:00:00Z",
+        "cuota1": 1.62,
+        "cuota2": 2.30,
+        "casa": "Bet365"
+      }
+    ]
+  }
+}
