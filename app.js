@@ -38,7 +38,8 @@ const INFO_LIGAS = {
   'CIN':    { nombre: 'Cincinnati Open', icono: '🇺🇸', superficie: 'Dura' },
   'SHA':    { nombre: 'Rolex Shanghai Masters', icono: '🇨🇳', superficie: 'Dura' },
   'PAR':    { nombre: 'Rolex Paris Masters', icono: '🇫🇷', superficie: 'Dura Indoor' },
-  // ATP 500 Destacados
+  // ATP 500 (Incluyendo Viena)
+  'VIE':    { nombre: 'Erste Bank Open (Viena)', icono: '🇦🇹', superficie: 'Dura Indoor' },
   'BAR':    { nombre: 'Barcelona Open Banc Sabadell', icono: '🇪🇸', superficie: 'Tierra Batida' },
   'LON':    { nombre: 'Queen\'s Club Championships', icono: '🇬🇧', superficie: 'Hierba' },
   'HAL':    { nombre: 'Halle Open', icono: '🇩🇪', superficie: 'Hierba' },
@@ -70,7 +71,7 @@ const FOTOS_JUGADORES = {
   'rybakina': './Logos Jugadores/rybakina.png'
 };
 
-let ligaActual = 'AO';
+let ligaActual = 'VIE'; // Torneo por defecto configurado a Viena
 let soloValor = false;
 let ordenActual = 'fecha';
 let modoHistorial = false;
@@ -108,42 +109,19 @@ function buscarEscudo(nombre) {
 async function cargarArchivoEstatico() {
   if (dbEstatica) return dbEstatica;
 
-  try {
-    const res = await fetch(`datos-tenis.json?t=${Date.now()}`);
-    if (res.ok) {
-      const json = await res.json();
-      if (json && (json.ligas || json.torneos || Array.isArray(json))) {
-        if (json.torneos && !json.ligas) json.ligas = json.torneos;
-        dbEstatica = json;
-        return dbEstatica;
+  const archivos = ['datos-tenis.json', 'datos-ligas.json', 'partidos.json'];
+  for (const archivo of archivos) {
+    try {
+      const res = await fetch(`${archivo}?t=${Date.now()}`);
+      if (res.ok) {
+        const json = await res.json();
+        if (json) {
+          if (json.torneos && !json.ligas) json.ligas = json.torneos;
+          dbEstatica = json;
+          return dbEstatica;
+        }
       }
-    }
-  } catch (e) {
-    console.warn('datos-tenis.json no disponible, probando datos-ligas.json...');
-  }
-
-  try {
-    const resLigas = await fetch(`datos-ligas.json?t=${Date.now()}`);
-    if (resLigas.ok) {
-      const jsonLigas = await resLigas.json();
-      if (jsonLigas && (jsonLigas.ligas || Array.isArray(jsonLigas))) {
-        dbEstatica = jsonLigas;
-        return dbEstatica;
-      }
-    }
-  } catch (e) {
-    console.warn('datos-ligas.json no disponible, probando partidos.json...');
-  }
-
-  try {
-    const resAlt = await fetch(`partidos.json?t=${Date.now()}`);
-    if (resAlt.ok) {
-      const jsonAlt = await resAlt.json();
-      dbEstatica = jsonAlt;
-      return dbEstatica;
-    }
-  } catch (e) {
-    console.warn('No se encontraron archivos JSON locales.');
+    } catch (e) {}
   }
 
   return null;
@@ -253,7 +231,6 @@ function analizarPartido(partido, index) {
 
   if (!cuotasSeleccionadas) return null;
 
-  // Cálculo de probabilidad justa (2-Way sin empate)
   const inversas = claves.map(k => 1 / cuotasSeleccionadas[k]);
   const suma = inversas.reduce((a, b) => a + b, 0);
   const justa = {};
@@ -279,7 +256,6 @@ function analizarPartido(partido, index) {
   if (probable.prob >= 0.68) etiquetaConfianza = "Favorito muy claro";
   else if (probable.prob >= 0.56) etiquetaConfianza = "Favorito sólido";
 
-  // Métricas específicas de Tenis (Juegos, Sets y Hándicap/Tie-Break)
   const probOver215 = probabilidadGeneral(partido, 'totals', 'Over', 21.5);
   const probOver225 = probabilidadGeneral(partido, 'totals', 'Over', 22.5);
   let tendenciaJuegos = partido.tendenciaJuegos || partido.tendenciaGoles || "";
@@ -297,17 +273,13 @@ function analizarPartido(partido, index) {
 
   let tendenciaSets = partido.tendenciaSets || partido.ambosMarcanTexto || "";
   if (!tendenciaSets) {
-    tendenciaSets = (probable.prob >= 0.64)
-      ? "2 Sets (Victoria en sets corridos)"
-      : "3 Sets / Ambos ganan un set";
+    tendenciaSets = (probable.prob >= 0.64) ? "2 Sets (Victoria en sets corridos)" : "3 Sets / Ambos ganan un set";
   }
 
   const nombreFavorito = probable.clave === 'local' ? localNombre : visitanteNombre;
   let tendenciaHandicap = partido.tendenciaHandicap || partido.tendenciaCorners || "";
   if (!tendenciaHandicap) {
-    tendenciaHandicap = (probable.prob >= 0.62)
-      ? `Hándicap -3.5 Juegos (${nombreFavorito})`
-      : "Hándicap +3.5 No Favorito / Posible Tie-Break";
+    tendenciaHandicap = (probable.prob >= 0.62) ? `Hándicap -3.5 Juegos (${nombreFavorito})` : "Hándicap +3.5 No Favorito / Posible Tie-Break";
   }
 
   const fechaPartido = new Date(partido.commence_time || partido.fecha || Date.now() + 3600000);
@@ -355,7 +327,7 @@ function actualizarEncabezadoLiga(codigoLiga) {
   if (iconoEl) iconoEl.textContent = info.icono;
 }
 
-async function cargarPartidos(codigoLiga = 'AO') {
+async function cargarPartidos(codigoLiga = 'VIE') {
   const container = document.getElementById('partidos-container');
   if (!container) return;
 
@@ -510,7 +482,7 @@ function toggleVistaHistorial() {
 }
 
 function cambiarLiga(codigo) {
-  ligaActual = codigo || 'AO';
+  ligaActual = codigo || 'VIE';
   cargarPartidos(ligaActual);
 }
 
@@ -575,90 +547,9 @@ async function cerrarSesionFirebase() {
   }
 }
 
-// ===================== PARTIDOS GLOBALES POR HORA =====================
-
-async function abrirModalPartidosGlobales() {
-    let modal = document.getElementById('modal-global-horas');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'modal-global-horas';
-        modal.className = 'fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex justify-center items-center p-4';
-        modal.innerHTML = `
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[85vh] p-6 relative shadow-2xl flex flex-col gap-4">
-                <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xl">⏰</span>
-                        <h3 class="text-base font-black text-white">Orden de Juego Global (Por Hora)</h3>
-                    </div>
-                    <button onclick="document.getElementById('modal-global-horas').classList.add('hidden')" class="text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
-                </div>
-                <div id="lista-global-horas" class="flex flex-col gap-2.5 overflow-y-auto pr-1 max-h-[60vh]">
-                    <div class="text-xs text-slate-400 text-center py-8">Cargando partidos de todos los torneos ATP/WTA...</div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    } else {
-        modal.classList.remove('hidden');
-    }
-
-    const contenedorLista = document.getElementById('lista-global-horas');
-    const estatico = await cargarArchivoEstatico();
-
-    if (!estatico || !estatico.ligas) {
-        contenedorLista.innerHTML = '<div class="text-xs text-slate-500 text-center py-6">No hay datos disponibles en este momento.</div>';
-        return;
-    }
-
-    let todos = [];
-    for (const [codigoLiga, lista] of Object.entries(estatico.ligas)) {
-        if (Array.isArray(lista)) {
-            const nombreLiga = INFO_LIGAS[codigoLiga]?.nombre || codigoLiga;
-            lista.forEach((p, idx) => {
-                const analizado = analizarPartido(p, idx);
-                if (analizado && analizado.fecha.getTime() > Date.now()) {
-                    todos.push({ ...analizado, ligaCodigo: codigoLiga, indexReal: idx, nombreLigaCompeticion: nombreLiga });
-                }
-            });
-        }
-    }
-
-    todos.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
-
-    if (todos.length === 0) {
-        contenedorLista.innerHTML = '<div class="text-xs text-slate-500 text-center py-6">No hay partidos futuros programados.</div>';
-        return;
-    }
-
-    contenedorLista.innerHTML = todos.map(p => `
-        <div onclick="window.location.href='partido.html?liga=${p.ligaCodigo}&id=${p.indexReal}'" class="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-3 rounded-xl cursor-pointer transition flex items-center justify-between gap-3 group">
-            <div class="flex items-center gap-3">
-                <span class="text-xs font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-900/50 px-2.5 py-1.5 rounded-lg">
-                    ${FECHA.format(p.fecha)}
-                </span>
-                <div class="flex flex-col">
-                    <span class="text-xs font-bold text-white group-hover:text-emerald-400 transition">${esc(p.local)} vs ${esc(p.visitante)}</span>
-                    <span class="text-[10px] text-slate-400">🎾 ${esc(p.nombreLigaCompeticion)}</span>
-                </div>
-            </div>
-            <div class="text-right">
-                <span class="text-[10px] text-slate-400 block">Cuota ${p.mejorCuota.cuota.toFixed(2)}</span>
-                <span class="text-[11px] font-bold text-emerald-400">${descripcionApuesta(p, p.resultadoSugerido)}</span>
-            </div>
-        </div>
-    `).join('');
-}
-
-document.addEventListener('click', (e) => {
-    const modal = document.getElementById('modal-global-horas');
-    if (e.target === modal) modal.classList.add('hidden');
-});
-
-// ===================== INICIALIZACIÓN AUTOMÁTICA =====================
-
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
-  const ligaParam = params.get('liga') || 'AO';
+  const ligaParam = params.get('liga') || 'VIE';
   modoHistorial = params.get('historial') === 'true';
 
   if (document.getElementById('partidos-container')) {
