@@ -20,6 +20,11 @@ const auth = firebase.auth();
 const UMBRAL_VALOR = 0.02;
 const MAX_PARTIDOS = 15;
 
+// API KEY CONFIGURADA (Solo se usará al pulsar el botón manual)
+const MI_API_KEY = "43d1835242f2dcbc0d4191d34292943c";
+const CACHE_KEY = 'pepobets_tenis_cache_v1';
+const CACHE_TIEMPO_KEY = 'pepobets_tenis_tiempo_v1';
+
 const INFO_LIGAS = {
   // Grand Slams
   'AO':     { nombre: 'Australian Open', icono: '🇦🇺', superficie: 'Dura' },
@@ -78,6 +83,7 @@ let modoHistorial = false;
 let partidosAnalizados = [];
 let dbEstatica = null;
 let cargaId = 0;
+let cargandoDatosApi = false;
 
 // ===================== UTILIDADES =====================
 
@@ -104,13 +110,33 @@ function buscarEscudo(nombre) {
   return ICONO_TENIS_DEFAULT;
 }
 
-// ===================== CAPA DE DATOS (BLOQUEO DE API ACTIVADO) =====================
+// ===================== CAPA DE DATOS (MODO ESTÁTICO + BOTÓN MANUAL) =====================
+
+function mapearClaveTorneo(sportKey) {
+  const k = sportKey.toLowerCase();
+  if (k.includes('vienna') || k.includes('erste_bank')) return 'VIE';
+  if (k.includes('aus_open')) return 'AO';
+  if (k.includes('french_open') || k.includes('roland_garros')) return 'RG';
+  if (k.includes('wimbledon')) return 'WIM';
+  if (k.includes('us_open')) return 'USO';
+  if (k.includes('finals')) return 'FIN';
+  if (k.includes('wta')) return 'WTA';
+  return 'ATP250';
+}
 
 async function cargarArchivoEstatico() {
   if (dbEstatica) return dbEstatica;
 
-  // MODO BLOQUEO DE API ACTIVADO: Cero peticiones externas para proteger la cuota.
-  // Lectura directa del archivo de respaldo local (datos-tenis.json).
+  // 1. Si el usuario sincronizó manualmente mediante el botón, leemos la caché local (0 peticiones)
+  const cacheGuardada = localStorage.getItem(CACHE_KEY);
+  if (cacheGuardada) {
+    try {
+      dbEstatica = JSON.parse(cacheGuardada);
+      return dbEstatica;
+    } catch (e) {}
+  }
+
+  // 2. Respaldo local por defecto (0 peticiones a la API)
   const archivos = ['datos-tenis.json', 'datos-ligas.json', 'partidos.json'];
   for (const archivo of archivos) {
     try {
@@ -127,6 +153,58 @@ async function cargarArchivoEstatico() {
   }
 
   return null;
+}
+
+// FUNCIÓN DE ACTUALIZACIÓN MANUAL (SOLO SE EJECUTA AL PULSAR EL BOTÓN)
+async function forzarActualizacionAPI() {
+  if (!confirm("¿Deseas realizar una petición real a la API para actualizar los datos? Esto consumirá cuota.")) {
+    return;
+  }
+
+  if (cargandoDatosApi) return;
+  cargandoDatosApi = true;
+  setEstado('🔄 Conectando con la API para actualizar partidos...');
+
+  if (MI_API_KEY) {
+    try {
+      const resSports = await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${MI_API_KEY}`);
+      if (resSports.ok) {
+        const todosDeportes = await resSports.json();
+        const torneosTenisActivos = todosDeportes.filter(s => s.key.startsWith('tennis_') && s.active);
+
+        const baseDatosVivo = { restantes: null, ligas: {} };
+
+        for (const torneo of torneosTenisActivos) {
+          const urlOdds = `https://api.the-odds-api.com/v4/sports/${torneo.key}/odds/?apiKey=${MI_API_KEY}&regions=eu&markets=h2h,totals&oddsFormat=decimal`;
+          const resOdds = await fetch(urlOdds);
+          if (resOdds.ok) {
+            const partidos = await resOdds.json();
+            const restantesHeader = resOdds.headers.get('x-requests-remaining');
+            if (restantesHeader) baseDatosVivo.restantes = restantesHeader;
+
+            const codigoTuWeb = mapearClaveTorneo(torneo.key);
+            if (!baseDatosVivo.ligas[codigoTuWeb]) baseDatosVivo.ligas[codigoTuWeb] = [];
+            baseDatosVivo.ligas[codigoTuWeb].push(...partidos);
+          }
+        }
+
+        if (Object.keys(baseDatosVivo.ligas).length > 0) {
+          dbEstatica = baseDatosVivo;
+          localStorage.setItem(CACHE_KEY, JSON.stringify(dbEstatica));
+          localStorage.setItem(CACHE_TIEMPO_KEY, Date.now().toString());
+          cargandoDatosApi = false;
+          alert(`¡Datos actualizados con éxito desde la API! Peticiones restantes: ${baseDatosVivo.restantes ?? 'N/D'}`);
+          location.reload();
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Error al conectar con la API en vivo.", err);
+    }
+  }
+
+  cargandoDatosApi = false;
+  alert("Error al conectar con la API en vivo. Usando datos locales.");
 }
 
 async function obtenerDatosLiga(codigoLiga) {
