@@ -26,8 +26,16 @@
           <a href="planes.html" class="px-3 py-2 rounded-lg hover:bg-slate-800 hover:text-white transition">Planes</a>
         </nav>
       </div>
-      <div id="auth-user-container" class="flex items-center gap-3">
-        <!-- Renderizado dinámico de Auth por app.js -->
+
+      <div class="flex items-center gap-3">
+        <!-- BOTÓN DE CONTROL MANUAL DE LA API (0 PETICIONES POR DEFECTO) -->
+        <button onclick="forzarActualizacionAPI()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 text-xs font-bold px-3 py-2 rounded-xl transition shadow flex items-center gap-1.5" title="Sincronizar manualmente con la API externa (gasta 1 petición)">
+          🔄 Sincronizar API
+        </button>
+
+        <div id="auth-user-container" class="flex items-center gap-3">
+          <!-- Renderizado dinámico de Auth por app.js -->
+        </div>
       </div>
     </div>
   </header>
@@ -41,7 +49,7 @@
       
       <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-full">
         <span>🎾 Motor V5 ATP / WTA Activo</span>
-        <span>• Análisis por Superficie y Valor Esperado (EV+)</span>
+        <span>• Modo Local Seguro (0 Peticiones Automáticas)</span>
       </div>
 
       <div class="space-y-3 max-w-2xl">
