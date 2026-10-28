@@ -2,9 +2,9 @@
 
 const firebaseConfig = {
   apiKey: "AIzaSyCqDo0GzIzXT-E3VPAkJVGg6wHiBBFb-Ac",
-  authDomain: "sportpredicts.firebaseapp.com",
-  projectId: "sportpredicts",
-  storageBucket: "sportpredicts.firebasestorage.app",
+  authDomain: "pepobets.firebaseapp.com",
+  projectId: "pepobets",
+  storageBucket: "pepobets.firebasestorage.app",
   messagingSenderId: "147554075482",
   appId: "1:147554075482:web:2b2827b8699b8c37b0e963",
   measurementId: "G-CL8NTKKTNP"
@@ -81,6 +81,7 @@ let modoHistorial = false;
 let partidosAnalizados = [];
 let dbEstatica = null;
 let cargaId = 0;
+let cargandoDatosApi = false;
 
 // ===================== UTILIDADES =====================
 
@@ -107,7 +108,7 @@ function buscarEscudo(nombre) {
   return ICONO_TENIS_DEFAULT;
 }
 
-// ===================== CAPA DE DATOS (CON API EN VIVO) =====================
+// ===================== CAPA DE DATOS CON CACHÉ LOCAL (LOCALSTORAGE) =====================
 
 function mapearClaveTorneo(sportKey) {
   const k = sportKey.toLowerCase();
@@ -123,8 +124,26 @@ function mapearClaveTorneo(sportKey) {
 
 async function cargarArchivoEstatico() {
   if (dbEstatica) return dbEstatica;
+  if (cargandoDatosApi) return null;
 
-  // 1. Intento de carga mediante The Odds API
+  // 1. COMPROBAR CACHÉ LOCAL (Expira en 2 horas para no gastar peticiones)
+  const CACHE_KEY = 'pepobets_tenis_cache_v1';
+  const CACHE_TIEMPO_KEY = 'pepobets_tenis_tiempo_v1';
+  const DOS_HORAS = 2 * 60 * 60 * 1000;
+
+  const cacheGuardada = localStorage.getItem(CACHE_KEY);
+  const tiempoGuardado = localStorage.getItem(CACHE_TIEMPO_KEY);
+
+  if (cacheGuardada && tiempoGuardado && (Date.now() - parseInt(tiempoGuardado) < DOS_HORAS)) {
+    try {
+      dbEstatica = JSON.parse(cacheGuardada);
+      return dbEstatica;
+    } catch (e) {}
+  }
+
+  cargandoDatosApi = true;
+
+  // 2. Intento de carga mediante The Odds API
   if (MI_API_KEY) {
     try {
       const resSports = await fetch(`https://api.the-odds-api.com/v4/sports/?apiKey=${MI_API_KEY}`);
@@ -150,6 +169,9 @@ async function cargarArchivoEstatico() {
 
         if (Object.keys(baseDatosVivo.ligas).length > 0) {
           dbEstatica = baseDatosVivo;
+          localStorage.setItem(CACHE_KEY, JSON.stringify(dbEstatica));
+          localStorage.setItem(CACHE_TIEMPO_KEY, Date.now().toString());
+          cargandoDatosApi = false;
           return dbEstatica;
         }
       }
@@ -158,7 +180,7 @@ async function cargarArchivoEstatico() {
     }
   }
 
-  // 2. Respaldo local (datos-tenis.json)
+  // 3. Respaldo local (datos-tenis.json)
   const archivos = ['datos-tenis.json', 'datos-ligas.json', 'partidos.json'];
   for (const archivo of archivos) {
     try {
@@ -168,12 +190,14 @@ async function cargarArchivoEstatico() {
         if (json) {
           if (json.torneos && !json.ligas) json.ligas = json.torneos;
           dbEstatica = json;
+          cargandoDatosApi = false;
           return dbEstatica;
         }
       }
     } catch (e) {}
   }
 
+  cargandoDatosApi = false;
   return null;
 }
 
@@ -512,7 +536,7 @@ function renderizarPartidos() {
   if (modoHistorial) {
     setEstado('📜 Mostrando historial de partidos de tenis finalizados con sus pronósticos');
   } else {
-    setEstado(`🟢 Motor Tenis V5 activo — ${lista.length} partido(s) disponibles`);
+    setEstado(`🟢 pepobets Tenis V5 activo — ${lista.length} partido(s) disponibles`);
   }
 
   if (lista.length === 0) {
